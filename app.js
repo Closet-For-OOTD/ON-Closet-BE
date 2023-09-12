@@ -1,11 +1,14 @@
 const express = require("express");
+const db = require("./config/database");
 
 const app = express();
 app.get("/", (req, res) => {
-  res.send("Home");
-  console.log("done");
+  db.query("SELECT * FROM outfit", function (err, result) {
+    console.log(result);
+    res.send(result);
+  });
 });
 
 app.listen(4000, () => {
-  console.log("Server is running on 3000");
+  console.log("Server is running on 4000");
 });
