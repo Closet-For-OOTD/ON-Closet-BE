@@ -1,14 +1,18 @@
 const express = require("express");
 const multer = require("multer");
 const db = require("./config/database");
+// const cors = require("cors");
 const bodyParser = require("body-parser");
+const path = require("path");
 
 const app = express();
+
+app.use("/public", express.static("public"));
 
 const upload = multer({
   storage: multer.diskStorage({
     destination: function (req, file, done) {
-      done(null, "public/files");
+      done(null, "public/files/");
     },
     filename: function (req, file, done) {
       const filename = file.originalname;
@@ -28,14 +32,11 @@ app.get("/list", (req, res) => {
 });
 
 app.post("/upload", upload.single("myfile"), (req, res) => {
-  console.log(req.file);
-  console.log(req.body);
   db.query(
     "INSERT INTO outfit(type, img) VALUES(?,?)",
     [req.body.clothingType, req.file.path],
     (err, results) => {
       if (err) throw err;
-      console.log(results);
     }
   );
 });
