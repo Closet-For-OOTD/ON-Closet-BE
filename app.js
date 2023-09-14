@@ -46,6 +46,14 @@ app.get("/", (req, res) => {
   res.send("Home");
 });
 
+app.delete("/delete", (req, res) => {
+  const removeid = req.body.removeid;
+  const sql = "DELETE FROM outfit WHERE id=?";
+  db.query(sql, removeid, (err, results) => {
+    return res.send(results);
+  });
+});
+
 app.listen(4000, () => {
   console.log("Server is running on 4000");
 });
