@@ -1,11 +1,13 @@
 const express = require("express");
 const multer = require("multer");
 const db = require("./config/database");
-// const cors = require("cors");
+const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
 
 const app = express();
+
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
 app.use("/public", express.static("public"));
 
@@ -41,11 +43,32 @@ app.post("/upload", upload.single("myfile"), (req, res) => {
   );
 });
 
+app.get("/outfitlists", (req, res) => {
+  db.query("SELECT * FROM outfitlists", (err, results) => {
+    res.send(results);
+  });
+});
+
+app.get("/uploadOutfit", (req, res) => {
+  db.query("SELECT * FROM outfitlists", (err, results) => {
+    res.send(results);
+  });
+});
+
 app.post("/uploadOutfit", (req, res) => {
   console.log("body is: ", req.body.value);
+
   db.query(
-    "INSERT INTO outfitList(id, img) VALUES(?,?)",
-    [req.body.value.id, req.body.value.img],
+    "UPDATE outfitlists SET img=?",
+    [req.body.value.img],
+    (err, results) => {
+      if (err) throw err;
+    }
+  );
+  // ! 여기 중복임.... 왜 한번에 작성하면 syntax 에러 -> 확인 후 수정!
+  db.query(
+    "UPDATE outfitlists SET id=?",
+    [req.body.value.id],
     (err, results) => {
       if (err) throw err;
     }
