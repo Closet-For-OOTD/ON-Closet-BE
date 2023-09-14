@@ -41,9 +41,15 @@ app.post("/upload", upload.single("myfile"), (req, res) => {
   );
 });
 
-app.get("/", (req, res) => {
-  console.log("연결");
-  res.send("Home");
+app.post("/uploadOutfit", (req, res) => {
+  console.log("body is: ", req.body.value);
+  db.query(
+    "INSERT INTO outfitList(id, img) VALUES(?,?)",
+    [req.body.value.id, req.body.value.img],
+    (err, results) => {
+      if (err) throw err;
+    }
+  );
 });
 
 app.delete("/delete", (req, res) => {
