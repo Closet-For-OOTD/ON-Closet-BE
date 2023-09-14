@@ -3,7 +3,6 @@ const multer = require("multer");
 const db = require("./config/database");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const path = require("path");
 
 const app = express();
 
@@ -39,47 +38,47 @@ app.post("/upload", upload.single("myfile"), (req, res) => {
     [req.body.clothingType, req.file.path],
     (err, results) => {
       if (err) throw err;
+      console.log(results);
     }
   );
 });
 
-app.get("/outfitlists", (req, res) => {
-  db.query("SELECT * FROM outfitlists", (err, results) => {
+app.get("/outfitList", (req, res) => {
+  db.query("SELECT * FROM outfitList", (err, results) => {
     res.send(results);
   });
 });
 
 app.get("/uploadOutfit", (req, res) => {
-  db.query("SELECT * FROM outfitlists", (err, results) => {
+  db.query("SELECT * FROM outfitLIST", (err, results) => {
     res.send(results);
   });
 });
-
+// 착장 페이지
 app.post("/uploadOutfit", (req, res) => {
   console.log("body is: ", req.body.value);
-
+  // ! 09.13 수 : db 수정 -> upsert 방식 사용(duplicate)
   db.query(
-    "UPDATE outfitlists SET img=?",
-    [req.body.value.img],
+    "INSERT INTO outfitList (id, type, img) VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE id= ?, img=? ",
+    [
+      req.body.value.id,
+      req.body.value.type,
+      req.body.value.img,
+      req.body.value.id,
+      req.body.value.img,
+    ],
     (err, results) => {
       if (err) throw err;
-    }
-  );
-  // ! 여기 중복임.... 왜 한번에 작성하면 syntax 에러 -> 확인 후 수정!
-  db.query(
-    "UPDATE outfitlists SET id=?",
-    [req.body.value.id],
-    (err, results) => {
-      if (err) throw err;
+      res.send(results);
     }
   );
 });
 
 app.delete("/delete", (req, res) => {
   const removeid = req.body.removeid;
-  const sql = "DELETE FROM outfit WHERE id=?";
+  const sql = "DELETE FROM outfit WHERE ID=?";
   db.query(sql, removeid, (err, results) => {
-    return res.send(results);
+    return res.send("success");
   });
 });
 
