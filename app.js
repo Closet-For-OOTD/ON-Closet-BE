@@ -32,7 +32,9 @@ app.get("/list", (req, res) => {
   });
 });
 
+// ! error -> path 못찾을떄 존재함! -> fileupload 방식 변경하고 test 진행!
 app.post("/upload", upload.single("myfile"), (req, res) => {
+  console.log("*&^^%$%#$#$:", req.file.path);
   db.query(
     "INSERT INTO outfit(type, img) VALUES(?,?)",
     [req.body.clothingType, req.file.path],
@@ -57,7 +59,6 @@ app.get("/uploadOutfit", (req, res) => {
 // 착장 페이지
 app.post("/uploadOutfit", (req, res) => {
   console.log("body is: ", req.body.value);
-  // ! 09.13 수 : db 수정 -> upsert 방식 사용(duplicate)
   db.query(
     "INSERT INTO outfitList (id, type, img) VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE id= ?, img=? ",
     [
