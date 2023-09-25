@@ -12,7 +12,6 @@ const bcrypt = require("bcrypt");
 
 const app = express();
 
-// ? app.use(express.static(path.join(__dirname, '/build')));
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use("/public", express.static("public"));
 app.use(bodyParser.json());
@@ -29,10 +28,6 @@ app.use(
     saveUninitialized: false,
   })
 );
-
-// ? app.get('/', (req, res) => {
-//   req.sendFile(path.join(__dirname, '/build/index.html'));
-// })
 
 app.get("/authcheck", (req, res) => {
   const sendData = { isLogin: "" };
@@ -60,12 +55,9 @@ app.post("/login", (req, res) => {
     db.query("SELECT * FROM user WHERE id= ?", [id], (err, results) => {
       if (err) throw err;
       if (results.length > 0) {
-        console.log("results:     ", results);
-        console.log("pwpwp:   ", pw);
-        console.log("results[0]:     ", results[0]);
         bcrypt.compare(pw, results[0].pw, (err, result) => {
           if (result === true) {
-            console.log("req.session.nickname: ::::::", req.session.nickname);
+            console.log("req.session.nickname: ", req.session.nickname);
             req.session.is_logined = true;
             req.session.nickname = id;
             req.session.save(function () {
@@ -96,7 +88,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/signin", (req, res) => {
-  console.log("signin - req.session :   ", req.session);
+  // console.log("회원가입 - req.session :   ", req.session);
   const id = req.body.id;
   const password = req.body.pw;
   const passwordCheck = req.body.pwCheck;
@@ -104,7 +96,7 @@ app.post("/signin", (req, res) => {
   const sendData = { isSuccess: "" };
 
   if (id && password && passwordCheck) {
-    db.query("SELECT * FROM user WHERE id =?", [id], (err, results, fields) => {
+    db.query("SELECT * FROM user WHERE id =?", [id], (err, results) => {
       if (err) throw err;
       // user 테이블에서 id가 id인 row를 찾아 results에 data저장 -> results의 길이가 0이면 해당 id는 테이블에 존재x
       if (results.length <= 0 && password === passwordCheck) {
@@ -131,36 +123,18 @@ app.post("/signin", (req, res) => {
       }
     });
   } else {
-    sendData.isSuccess = "아이디와 비밀번호를 입력하세요";
-    res.send(sendData);
+    if (id == "") {
+      sendData.isSuccess = "아이디를 입력하세요";
+      res.send(sendData);
+    } else if (password == "") {
+      sendData.isSuccess = "비밀번호를 입력하세요";
+      res.send(sendData);
+    } else {
+      sendData.isSuccess = "비밀번호 확인을 입력하세요";
+      res.send(sendData);
+    }
   }
 });
-
-// ! 회원가입 api
-// app.post("/login", (req, res) => {
-//   console.log("/member", req.body);
-//   const usr = req.body.name;
-//   const pw = req.body.pw;
-//   const sendData = { isLogin: "" };
-
-//   if (usr && password) {
-//     db.query("SELECT * FROM user WHERE usr = ?", [usr], (err, results) => {
-//       if (err) throw err;
-//       if (results.length > 0) {
-//         bcrypt.compare(pw, results[0], (err, results) => {
-//           if (results === true) {
-//             req.session.is_logined = true;
-//             req.session.nickname = usr;
-//             req.session.save(function () {
-//               sendData.isLogin = "True";
-//               res.send(sendData);
-//             });
-//           }
-//         });
-//       }
-//     });
-//   }
-// });
 
 const upload = multer({
   storage: multer.diskStorage({
