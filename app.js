@@ -8,6 +8,8 @@ const bodyParser = require("body-parser");
 // ! 로그인 & 회원가입
 const session = require("express-session");
 const sessionOption = require("./config/sessionOption");
+const MySQLStore = require("express-mysql-session")(session);
+const sessionStore = new MySQLStore(sessionOption);
 const bcrypt = require("bcrypt");
 
 const app = express();
@@ -17,8 +19,6 @@ app.use("/public", express.static("public"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const MySQLStore = require("express-mysql-session")(session);
-const sessionStore = new MySQLStore(sessionOption);
 app.use(
   session({
     key: "session_cookie_name",
@@ -39,8 +39,7 @@ app.get("/authcheck", (req, res) => {
   res.send(sendData);
 });
 
-app.get("/logout", (req, res) => {
-  console.log("'logout - 'req.session :   ", req.session);
+app.get("/logout", function (req, res) {
   req.session.destroy(function (err) {
     res.redirect("/");
   });
@@ -52,23 +51,26 @@ app.post("/login", (req, res) => {
   const sendData = { isLogin: "" };
 
   if (id && pw) {
-    db.query("SELECT * FROM user WHERE id= ?", [id], (err, results) => {
+    db.query("SELECT * FROM userTable WHERE id= ?", [id], (err, results) => {
       if (err) throw err;
       if (results.length > 0) {
         bcrypt.compare(pw, results[0].pw, (err, result) => {
           if (result === true) {
-            console.log("req.session.nickname: ", req.session.nickname);
+            console.log("wowowowo:", req.session);
             req.session.is_logined = true;
             req.session.nickname = id;
+
+            // req.session.save 실행시 session 데이터를 즉시 저장
             req.session.save(function () {
               sendData.isLogin = "True";
               res.send(sendData);
             });
             db.query(
-              "INSERT INTO logInfo (created, id, action) VALUES (NOW(), ?, 'login')",
+              "INSERT INTO logTable (created, id, actiondetail) VALUES (Now() ,?, 'login')",
               [req.session.nickname],
-              (err, results) => {
+              (err, result) => {
                 if (err) throw err;
+                console.log(result);
               }
             );
           } else {
@@ -82,7 +84,7 @@ app.post("/login", (req, res) => {
       }
     });
   } else {
-    sendData.isLogin = "아이디와 비밀번호를 입력하세요";
+    sendData.isLogin = "아이디와 비밀번호를 입력하세요?";
     res.send(sendData);
   }
 });
@@ -96,14 +98,14 @@ app.post("/signin", (req, res) => {
   const sendData = { isSuccess: "" };
 
   if (id && password && passwordCheck) {
-    db.query("SELECT * FROM user WHERE id =?", [id], (err, results) => {
+    db.query("SELECT * FROM userTable WHERE id =?", [id], (err, results) => {
       if (err) throw err;
       // user 테이블에서 id가 id인 row를 찾아 results에 data저장 -> results의 길이가 0이면 해당 id는 테이블에 존재x
       if (results.length <= 0 && password === passwordCheck) {
         const hashedPassword = bcrypt.hashSync(password, 10);
 
         db.query(
-          "INSERT INTO user (id, pw ) VALUES(?, ?)",
+          "INSERT INTO userTable (id, pw ) VALUES(?, ?)",
           [id, hashedPassword],
           (err, data) => {
             if (err) throw err;
@@ -156,8 +158,7 @@ app.get("/list", (req, res) => {
 });
 
 // ! error -> path 못찾을떄 존재함! -> fileupload 방식 변경하고 test 진행!
-app.post("/upload", upload.single("myfile"), (req, res) => {
-  console.log("*&^^%$%#$#$:", req.file.path);
+app.post("/upload_cloth", upload.single("myfile"), (req, res) => {
   db.query(
     "INSERT INTO outfit(type, img) VALUES(?,?)",
     [req.body.clothingType, req.file.path],
