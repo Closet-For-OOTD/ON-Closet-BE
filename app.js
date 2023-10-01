@@ -16,6 +16,7 @@ const app = express();
 
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use("/public", express.static("public"));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -157,11 +158,10 @@ app.get("/list", (req, res) => {
   });
 });
 
-// ! error -> path 못찾을떄 존재함! -> fileupload 방식 변경하고 test 진행!
-app.post("/upload_cloth", upload.single("myfile"), (req, res) => {
+app.post("/upload", upload.single("myfile"), (req, res) => {
   db.query(
-    "INSERT INTO outfit(type, img) VALUES(?,?)",
-    [req.body.clothingType, req.file.path],
+    "INSERT INTO outfit(type, img, userId) VALUES(?,?,?)",
+    [req.body.clothingType, req.file.path, req.body.userId],
     (err, results) => {
       if (err) throw err;
       console.log(results);
@@ -176,7 +176,7 @@ app.get("/outfitList", (req, res) => {
 });
 
 app.get("/uploadOutfit", (req, res) => {
-  db.query("SELECT * FROM outfitLIST", (err, results) => {
+  db.query("SELECT * FROM outfitList", (err, results) => {
     res.send(results);
   });
 });
@@ -184,13 +184,15 @@ app.get("/uploadOutfit", (req, res) => {
 app.post("/uploadOutfit", (req, res) => {
   console.log("body is: ", req.body.value);
   db.query(
-    "INSERT INTO outfitList (id, type, img) VALUES(?, ?, ?) ON DUPLICATE KEY UPDATE id= ?, img=? ",
+    "INSERT INTO outfitList (id, type, img, userId) VALUES(?, ?, ?, ?) ON DUPLICATE KEY UPDATE id=?, img=?, userId= ?",
     [
       req.body.value.id,
       req.body.value.type,
       req.body.value.img,
+      req.body.value.userId,
       req.body.value.id,
       req.body.value.img,
+      req.body.value.userId,
     ],
     (err, results) => {
       if (err) throw err;
