@@ -57,7 +57,7 @@ app.post("/login", (req, res) => {
       if (results.length > 0) {
         bcrypt.compare(pw, results[0].pw, (err, result) => {
           if (result === true) {
-            console.log("wowowowo:", req.session);
+            // console.log( req.session);
             req.session.is_logined = true;
             req.session.nickname = id;
 
@@ -71,7 +71,7 @@ app.post("/login", (req, res) => {
               [req.session.nickname],
               (err, result) => {
                 if (err) throw err;
-                console.log(result);
+                // console.log(result);
               }
             );
           } else {
@@ -110,7 +110,7 @@ app.post("/signin", (req, res) => {
           [id, hashedPassword],
           (err, data) => {
             if (err) throw err;
-            console.log("data : ", data);
+            // console.log("data : ", data);
             req.session.save(function () {
               sendData.isSuccess = "True";
               res.send(sendData);
@@ -164,7 +164,7 @@ app.post("/upload", upload.single("myfile"), (req, res) => {
     [req.body.clothingType, req.file.path, req.body.userId],
     (err, results) => {
       if (err) throw err;
-      console.log(results);
+      // console.log(results);
     }
   );
 });
@@ -182,7 +182,7 @@ app.get("/uploadOutfit", (req, res) => {
 });
 // 착장 페이지
 app.post("/uploadOutfit", (req, res) => {
-  console.log("body is: ", req.body.value);
+  // console.log("body is: ", req.body.value);
   db.query(
     "INSERT INTO outfitList (id, type, img, userId) VALUES(?, ?, ?, ?) ON DUPLICATE KEY UPDATE id=?, img=?, userId= ?",
     [
