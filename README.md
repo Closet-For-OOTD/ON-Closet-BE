@@ -9,8 +9,11 @@ ONLine Closet 토이프로젝트 BE
 
 ## 👚 기술스택
 ### ✨ Frontend
+<span>
 <img src="https://img.shields.io/badge/react-61DAFB?style=for-the-badge&logo=react&logoColor=black"> 
- 
+ <img src="https://img.shields.io/badge/Redux-764ABC?style=for-the-badge&logo=Redux&logoColor=purple">
+</span>
+
 ###  ✨ Backend
 <span>
 <img src="https://img.shields.io/badge/express-000000?style=for-the-badge&logo=express&logoColor=white">
